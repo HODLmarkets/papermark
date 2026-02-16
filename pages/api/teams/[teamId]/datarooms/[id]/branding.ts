@@ -90,6 +90,15 @@ export default async function handle(
       },
     });
 
+    // Trigger ISR revalidation for dataroom links
+    try {
+      await fetch(
+        `${process.env.NEXTAUTH_URL}/api/revalidate?secret=${process.env.REVALIDATE_TOKEN}&dataroomId=${dataroomId}`,
+      );
+    } catch (revalidateError) {
+      console.error("Failed to trigger ISR revalidation:", revalidateError);
+    }
+
     return res.status(200).json(brand);
   } else if (req.method === "PUT") {
     // PUT /api/teams/:teamId/datarooms/:id/branding
@@ -113,6 +122,15 @@ export default async function handle(
         welcomeMessage,
       },
     });
+
+    // Trigger ISR revalidation for dataroom links
+    try {
+      await fetch(
+        `${process.env.NEXTAUTH_URL}/api/revalidate?secret=${process.env.REVALIDATE_TOKEN}&dataroomId=${dataroomId}`,
+      );
+    } catch (revalidateError) {
+      console.error("Failed to trigger ISR revalidation:", revalidateError);
+    }
 
     return res.status(200).json(brand);
   } else if (req.method === "DELETE") {
@@ -139,6 +157,15 @@ export default async function handle(
         id: brand?.id,
       },
     });
+
+    // Trigger ISR revalidation for dataroom links
+    try {
+      await fetch(
+        `${process.env.NEXTAUTH_URL}/api/revalidate?secret=${process.env.REVALIDATE_TOKEN}&dataroomId=${dataroomId}`,
+      );
+    } catch (revalidateError) {
+      console.error("Failed to trigger ISR revalidation:", revalidateError);
+    }
 
     return res.status(204).end();
   } else {

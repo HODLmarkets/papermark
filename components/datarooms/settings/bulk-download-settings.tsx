@@ -40,12 +40,17 @@ export default function BulkDownloadSettings({
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleBulkDownloadToggle = async (checked: boolean) => {
-    if (!dataroomId || !teamId || isUpdating) return;
+    if (!dataroomId || !teamId || isUpdating || !dataroomData) return;
 
     setIsUpdating(true);
 
-    toast.promise(
-      fetch(`/api/teams/${teamId}/datarooms/${dataroomId}`, {
+    const optimisticData = {
+      ...dataroomData,
+      allowBulkDownload: checked,
+    };
+
+    const mutation = async () => {
+      const res = await fetch(`/api/teams/${teamId}/datarooms/${dataroomId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -53,20 +58,34 @@ export default function BulkDownloadSettings({
         body: JSON.stringify({
           allowBulkDownload: checked,
         }),
-      }).then(async (res) => {
-        if (!res.ok) {
-          throw new Error("Failed to update bulk download settings");
-        }
-        await mutateDataroom();
-      }),
-      {
-        loading: "Updating bulk download settings...",
-        success: "Bulk download settings updated successfully",
-        error: "Failed to update bulk download settings",
-      },
-    );
+      });
 
-    setIsUpdating(false);
+      if (!res.ok) {
+        throw new Error("Failed to update bulk download settings");
+      }
+
+      return res.json();
+    };
+
+    try {
+      await toast.promise(
+        mutateDataroom(mutation(), {
+          optimisticData,
+          rollbackOnError: true,
+          populateCache: true,
+          revalidate: false,
+        }),
+        {
+          loading: "Updating bulk download settings...",
+          success: "Bulk download settings updated successfully",
+          error: (err) => err.message,
+        },
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (

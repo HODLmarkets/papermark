@@ -231,8 +231,12 @@ export default function DataroomBrandPage() {
       },
     );
     if (res.ok) {
+      // Invalidate both the branding cache and the main dataroom cache
       mutate(
         `/api/teams/${teamInfo?.currentTeam?.id}/datarooms/${dataroom.id}/branding`,
+      );
+      mutate(
+        `/api/teams/${teamInfo?.currentTeam?.id}/datarooms/${dataroom.id}`,
       );
       // Update the original banner state to the new saved value
       setOriginalBanner(data.banner);
@@ -259,6 +263,13 @@ export default function DataroomBrandPage() {
       setOriginalBanner(DEFAULT_BANNER_IMAGE);
       setBrandColor("#000000");
       setIsLoading(false);
+      // Invalidate both branding and main dataroom caches
+      mutate(
+        `/api/teams/${teamInfo?.currentTeam?.id}/datarooms/${dataroom.id}/branding`,
+      );
+      mutate(
+        `/api/teams/${teamInfo?.currentTeam?.id}/datarooms/${dataroom.id}`,
+      );
       toast.success("Branding reset successfully");
       router.reload();
     }

@@ -109,8 +109,7 @@ export function useDataroomItems({
       `/api/teams/${teamId}/datarooms/${id}/folders${root ? "?root=true" : name ? `/${name.join("/")}` : ""}`,
     fetcher,
     {
-      revalidateOnFocus: false,
-      dedupingInterval: 30000,
+      dedupingInterval: 10000,
     },
   );
 
@@ -123,8 +122,7 @@ export function useDataroomItems({
 
     fetcher,
     {
-      revalidateOnFocus: false,
-      dedupingInterval: 30000,
+      dedupingInterval: 10000,
     },
   );
 
@@ -171,8 +169,7 @@ export function useDataroomDocuments() {
     teamId && id && `/api/teams/${teamId}/datarooms/${id}/documents`,
     fetcher,
     {
-      revalidateOnFocus: false,
-      dedupingInterval: 30000,
+      dedupingInterval: 10000,
     },
   );
 
@@ -205,8 +202,7 @@ export function useDataroomFolders({
       `/api/teams/${teamId}/datarooms/${id}/folders${root ? "?root=true" : name ? `/${name.join("/")}` : ""}`,
     fetcher,
     {
-      revalidateOnFocus: false,
-      dedupingInterval: 30000,
+      dedupingInterval: 10000,
     },
   );
 
@@ -247,8 +243,7 @@ export function useDataroomFoldersTree({
       `/api/teams/${teamId}/datarooms/${dataroomId}/folders${include_documents ? "?include_documents=true" : ""}`,
     fetcher,
     {
-      revalidateOnFocus: false,
-      dedupingInterval: 30000,
+      dedupingInterval: 10000,
     },
   );
 
@@ -276,8 +271,7 @@ export function useDataroomFolderWithParents({
       `/api/teams/${teamId}/datarooms/${dataroomId}/folders/parents/${name.join("/")}`,
     fetcher,
     {
-      revalidateOnFocus: false,
-      dedupingInterval: 30000,
+      dedupingInterval: 10000,
     },
   );
 
@@ -319,8 +313,7 @@ export function useDataroomFolderDocuments({ name }: { name: string[] }) {
       `/api/teams/${teamId}/datarooms/${id}/folders/documents/${name.join("/")}`,
     fetcher,
     {
-      revalidateOnFocus: false,
-      dedupingInterval: 30000,
+      dedupingInterval: 10000,
     },
   );
 

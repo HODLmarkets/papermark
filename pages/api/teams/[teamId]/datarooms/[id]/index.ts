@@ -232,6 +232,17 @@ export default async function handle(
         return { ...dataroom, tags: dataroomTags };
       });
 
+      // Trigger ISR revalidation for all links associated with this dataroom
+      // so viewers see updated configurations (branding, permissions, etc.)
+      try {
+        await fetch(
+          `${process.env.NEXTAUTH_URL}/api/revalidate?secret=${process.env.REVALIDATE_TOKEN}&dataroomId=${dataroomId}`,
+        );
+      } catch (revalidateError) {
+        // Non-blocking: log but don't fail the update
+        console.error("Failed to trigger ISR revalidation:", revalidateError);
+      }
+
       return res.status(200).json(updatedDataroom);
     } catch (error) {
       errorhandler(error, res);

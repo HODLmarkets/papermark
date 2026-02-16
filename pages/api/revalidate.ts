@@ -15,10 +15,11 @@ export default async function handler(
     return res.status(401).json({ message: "Invalid token" });
   }
 
-  const { linkId, documentId, teamId, hasDomain } = req.query as {
+  const { linkId, documentId, teamId, dataroomId, hasDomain } = req.query as {
     linkId: string;
     documentId: string;
     teamId: string;
+    dataroomId: string;
     hasDomain: string;
   };
 
@@ -64,6 +65,32 @@ export default async function handler(
         } else {
           // revalidate a regular papermark link
           console.log("revalidating document link", `/view/${link.id}`);
+          await res.revalidate(`/view/${link.id}`);
+        }
+      }
+    }
+
+    if (dataroomId) {
+      // revalidate all links for this dataroom
+      const dataroomLinks = await prisma.link.findMany({
+        where: {
+          dataroomId: dataroomId,
+          linkType: "DATAROOM_LINK",
+          isArchived: false,
+          deletedAt: null,
+        },
+        select: { id: true, domainSlug: true, slug: true, domainId: true },
+      });
+
+      for (const link of dataroomLinks) {
+        if (link.domainSlug && link.slug) {
+          console.log(
+            "revalidating dataroom domain link",
+            `/view/domains/${link.domainSlug}/${link.slug}`,
+          );
+          await res.revalidate(`/view/domains/${link.domainSlug}/${link.slug}`);
+        } else {
+          console.log("revalidating dataroom link", `/view/${link.id}`);
           await res.revalidate(`/view/${link.id}`);
         }
       }

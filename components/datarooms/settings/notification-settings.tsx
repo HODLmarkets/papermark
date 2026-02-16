@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { useTeam } from "@/context/team-context";
 import { BadgeCheckIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -46,16 +48,25 @@ export default function NotificationSettings({
     fetcher,
   );
 
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const handleNotificationToggle = async (checked: boolean) => {
-    if (!dataroomId || !teamId) return;
+    if (!dataroomId || !teamId || isUpdating || !dataroomData) return;
 
     if (!isDataroomsPlus && !isTrial && !features?.roomChangeNotifications) {
       toast.error("This feature is not available in your plan");
       return;
     }
 
-    toast.promise(
-      fetch(`/api/teams/${teamId}/datarooms/${dataroomId}`, {
+    setIsUpdating(true);
+
+    const optimisticData = {
+      ...dataroomData,
+      enableChangeNotifications: checked,
+    };
+
+    const mutation = async () => {
+      const res = await fetch(`/api/teams/${teamId}/datarooms/${dataroomId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -63,18 +74,34 @@ export default function NotificationSettings({
         body: JSON.stringify({
           enableChangeNotifications: checked,
         }),
-      }).then(async (res) => {
-        if (!res.ok) {
-          throw new Error("Failed to update notification settings");
-        }
-        await mutateDataroom();
-      }),
-      {
-        loading: "Updating notification settings...",
-        success: "Notification settings updated successfully",
-        error: "Failed to update notification settings",
-      },
-    );
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update notification settings");
+      }
+
+      return res.json();
+    };
+
+    try {
+      await toast.promise(
+        mutateDataroom(mutation(), {
+          optimisticData,
+          rollbackOnError: true,
+          populateCache: true,
+          revalidate: false,
+        }),
+        {
+          loading: "Updating notification settings...",
+          success: "Notification settings updated successfully",
+          error: (err) => err.message,
+        },
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -99,6 +126,7 @@ export default function NotificationSettings({
           id="notification-toggle"
           checked={dataroomData?.enableChangeNotifications ?? false}
           onCheckedChange={handleNotificationToggle}
+          disabled={isUpdating}
         />
       </CardContent>
       <CardFooter className="flex items-center justify-between rounded-b-lg border-t bg-muted px-6 py-6">
