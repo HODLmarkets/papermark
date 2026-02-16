@@ -62,3 +62,7 @@ lib/emails/marketing
 
 # changelog
 changelog
+
+# Claude
+.claude/
+@@/CLAUDE.md
